@@ -6,7 +6,7 @@ A simple single-file javascript interpreter written in C++.
 Foreword
 ========
 
-The original project has been developed by [Gordon Williams](www.pur3.co.uk). All credits of the initial breed are due to him.
+The original project has been developed by [Gordon Williams](http://www.pur3.co.uk). All credits of the initial breed are due to him.
 
 Description
 ===========
@@ -19,11 +19,11 @@ I make absolutely no guarantees that this is compliant to JavaScript/EcmaScript 
 
 Currently TinyJS supports:
 
-* Variables, Arrays, Structures
+* Variables, arrays, structures
 * JSON parsing and output
 * Functions
 * Calling C/C++ code from JavaScript
-* Objects with Inheritance (not fully implemented)
+* Objects with inheritance (not fully implemented)
 
 Please see the **Code Examples** chapter for examples of code that works.
 
