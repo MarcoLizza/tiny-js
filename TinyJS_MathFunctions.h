@@ -34,7 +34,11 @@
 
 #include "TinyJS.h"
 
+namespace TinyJS {
+
 /// Register useful math. functions with the TinyJS interpreter
-extern void registerMathFunctions(CTinyJS *tinyJS);
+extern void registerMathFunctions(Interpreter *interpreter);
+
+};
 
 #endif

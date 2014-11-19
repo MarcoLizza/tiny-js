@@ -32,7 +32,11 @@
 
 #include "TinyJS.h"
 
+namespace TinyJS {
+
 /// Register useful functions with the TinyJS interpreter
-extern void registerFunctions(CTinyJS *tinyJS);
+extern void registerFunctions(Interpreter *interpreter);
+
+};
 
 #endif

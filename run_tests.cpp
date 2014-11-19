@@ -4,6 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2009 Pur3 Ltd
  *
@@ -211,13 +212,13 @@ bool run_test(const char *filename) {
   buffer[size]=0;
   fclose(file);
 
-  CTinyJS s;
-  registerFunctions(&s);
-  registerMathFunctions(&s);
-  s.root->addChild("result", new CScriptVar("0",SCRIPTVAR_INTEGER));
+  TinyJS::Interpreter s;
+  TinyJS::registerFunctions(&s);
+  TinyJS::registerMathFunctions(&s);
+  s.root->addChild("result", new TinyJS::Variable("0",TinyJS::VARIABLE_INTEGER));
   try {
     s.execute(buffer);
-  } catch (CScriptException *e) {
+  } catch (TinyJS::Exception *e) {
     printf("ERROR: %s\n", e->text.c_str());
   }
   bool pass = s.root->getParameter("result")->getBool();
@@ -281,8 +282,8 @@ int main(int argc, char **argv)
     memtracing_kill();
 #endif
 
-#ifdef _DEBUG
- #ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN32_WCE)
+ #ifdef DEBUG
   _CrtDumpMemoryLeaks();
  #endif
 #endif

@@ -4,6 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2009 Pur3 Ltd
  *
@@ -41,21 +42,20 @@
 //const char *code = "{ var b = 1; for (var i=0;i<4;i=i+1) b = b * 2; }";
 const char *code = "function myfunc(x, y) { return x + y; } var a = myfunc(1,2); print(a);";
 
-void js_print(CScriptVar *v, void *userdata) {
+void js_print(TinyJS::Variable *v, void *userdata) {
     printf("> %s\n", v->getParameter("text")->getString().c_str());
 }
 
-void js_dump(CScriptVar *v, void *userdata) {
+void js_dump(TinyJS::Variable *v, void *userdata) {
     CTinyJS *js = (CTinyJS*)userdata;
     js->root->trace(">  ");
 }
 
-
 int main(int argc, char **argv)
 {
-  CTinyJS *js = new CTinyJS();
+  TinyJS::Interpreter *js = new TinyJS::Interpreter();
   /* add the functions from TinyJS_Functions.cpp */
-  registerFunctions(js);
+  TinyJS::registerFunctions(js);
   /* Add a native function */
   js->addNative("function print(text)", &js_print, 0);
   js->addNative("function dump()", &js_dump, js);
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   try {
     js->execute("var lets_quit = 0; function quit() { lets_quit = 1; }");
     js->execute("print(\"Interactive mode... Type quit(); to exit, or print(...); to print something, or dump() to dump the symbol table!\");");
-  } catch (CScriptException *e) {
+  } catch (TinyJS::Exception *e) {
     printf("ERROR: %s\n", e->text.c_str());
   }
 
@@ -73,12 +73,12 @@ int main(int argc, char **argv)
     fgets ( buffer, sizeof(buffer), stdin );
     try {
       js->execute(buffer);
-    } catch (CScriptException *e) {
+    } catch (TinyJS::Exception *e) {
       printf("ERROR: %s\n", e->text.c_str());
     }
   }
   delete js;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN32_WCE)
 #ifdef _DEBUG
   _CrtDumpMemoryLeaks();
 #endif
