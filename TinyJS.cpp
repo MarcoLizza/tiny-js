@@ -2125,17 +2125,18 @@ CScriptVar *CTinyJS::getScriptVariable(const string &path) {
     return var;
 }
 
-/// Get the value of the given variable, or return 0
-const string *CTinyJS::getVariable(const string &path) {
+/// get the value of the given variable, return true if it exists and fetched
+bool CTinyJS::getVariable(const string &path, string &varData) {
     CScriptVar *var = getScriptVariable(path);
     // return result
-    if (var)
-        return &var->getString();
-    else
-        return 0;
+    if (var) {
+        varData = var->getString();
+        return true;
+    } else
+        return false;
 }
 
-/// set the value of the given variable, return trur if it exists and gets set
+/// set the value of the given variable, return true if it exists and gets set
 bool CTinyJS::setVariable(const std::string &path, const std::string &varData) {
     CScriptVar *var = getScriptVariable(path);
     // return result
