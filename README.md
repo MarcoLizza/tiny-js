@@ -6,7 +6,7 @@ A simple single-file javascript interpreter written in C++.
 Foreword
 ========
 
-The original project has been developed by [Gordon Williams](http://www.pur3.co.uk). All credits of the initial breed are due to him.
+The original project has been developed by [Gordon Williams](http://www.pur3.co.uk). Credits are due to him.
 
 Description
 ===========
