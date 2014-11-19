@@ -231,17 +231,6 @@ bool isAlpha(char ch) {
     return ((ch>='a') && (ch<='z')) || ((ch>='A') && (ch<='Z')) || ch=='_';
 }
 
-bool isIDString(const char *s) {
-    if (!isAlpha(*s))
-        return false;
-    while (*s) {
-        if (!(isAlpha(*s) || isNumeric(*s)))
-            return false;
-        s++;
-    }
-    return true;
-}
-
 void replace(string &str, char textFrom, const char *textTo) {
     int sLen = strlen(textTo);
     size_t p = str.find(textFrom);
