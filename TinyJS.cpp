@@ -4,6 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2009 Pur3 Ltd
  *
@@ -122,7 +123,9 @@
 #include "TinyJS.h"
 #include <assert.h>
 
-#define ASSERT(X) assert(X)
+#ifndef ASSERT
+  #define ASSERT(X) assert(X)
+#endif
 /* Frees the given link IF it isn't owned by anything else */
 #define CLEAN(x) { CScriptVarLink *__v = x; if (__v && !__v->owned) { delete __v; } }
 /* Create a LINK to point to VAR and free the old link.
@@ -137,7 +140,7 @@
 
 using namespace std;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN32_WCE)
 #ifdef _DEBUG
    #ifndef DBG_NEW
       #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
@@ -147,9 +150,14 @@ using namespace std;
 #endif
 
 #ifdef __GNUC__
-#define vsprintf_s vsnprintf
-#define sprintf_s snprintf
-#define _strdup strdup
+  #define vsprintf_s vsnprintf
+  #define sprintf_s snprintf
+  #define _strdup strdup
+#endif
+
+#ifdef _WIN32_WCE
+  #include <strsafe.h>
+  #define sprintf_s StringCbPrintfA
 #endif
 
 // ----------------------------------------------------------------------------------- Memory Debug

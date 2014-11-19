@@ -6,6 +6,7 @@
  * - Useful language functions
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2009 Pur3 Ltd
  *

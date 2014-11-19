@@ -4,6 +4,7 @@
  * A single-file Javascript-alike engine
  *
  * Authored By Gordon Williams <gw@pur3.co.uk>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2009 Pur3 Ltd
  *
@@ -29,21 +30,23 @@
 #ifndef TINYJS_H
 #define TINYJS_H
 
-// If defined, this keeps a note of all calls and where from in memory. This is slower, but good for debugging
-#define TINYJS_CALL_STACK
-
-#ifdef _WIN32
 #ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
+  // If defined, this keeps a note of all calls and where from in memory. This is slower, but good for debugging
+  #define TINYJS_CALL_STACK
 #endif
+
+#if defined(_WIN32) && !defined(_WIN32_WCE)
+  #ifdef _DEBUG
+    #define _CRTDBG_MAP_ALLOC
+    #include <stdlib.h>
+    #include <crtdbg.h>
+  #endif
 #endif
 #include <string>
 #include <vector>
 
 #ifndef TRACE
-#define TRACE printf
+  #define TRACE printf
 #endif // TRACE
 
 

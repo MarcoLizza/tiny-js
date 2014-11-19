@@ -6,6 +6,7 @@
  * -  Math and Trigonometry functions
  *
  * Authored By O.Z.L.B. <ozlbinfo@gmail.com>
+ * Additional Coding By Marco Lizza <marco.lizza@gmail.com>
  *
  * Copyright (C) 2011 O.Z.L.B.
  *
