@@ -19,11 +19,11 @@ I make absolutely no guarantees that this is compliant to JavaScript/EcmaScript 
 
 Currently TinyJS supports:
 
-* Variables, Arrays, Structures
+* Variables, arrays, structures
 * JSON parsing and output
 * Functions
 * Calling C/C++ code from JavaScript
-* Objects with Inheritance (not fully implemented)
+* Objects with inheritance (not fully implemented)
 
 Please see the **Code Examples** chapter for examples of code that works.
 
