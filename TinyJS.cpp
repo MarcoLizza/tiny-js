@@ -693,7 +693,7 @@ void VariableLink::replaceWith(VariableLink *newVar) {
       replaceWith(new Variable());
 }
 
-int VariableLink::getIntName() {
+int VariableLink::getIntName() const {
     return atoi(name.c_str());
 }
 
@@ -721,7 +721,7 @@ Variable::Variable(const std::string &str) {
 #endif
     init();
     flags = VARIABLE_STRING;
-    data = str;
+    stringData = str;
 }
 
 
@@ -737,7 +737,7 @@ Variable::Variable(const std::string &varData, int varFlags) {
     } else if (varFlags & VARIABLE_DOUBLE) {
       doubleData = strtod(varData.c_str(),0);
     } else
-      data = varData;
+    stringData = varData;
 }
 
 Variable::Variable(double val) {
@@ -771,7 +771,7 @@ void Variable::init() {
     flags = 0;
     jsCallback = 0;
     jsCallbackUserData = 0;
-    data = TINYJS_BLANK_DATA;
+    stringData = TINYJS_BLANK_DATA;
     intData = 0;
     doubleData = 0;
 }
@@ -789,7 +789,7 @@ Variable *Variable::getParameter(const std::string &name) {
     return findChildOrCreate(name)->var;
 }
 
-VariableLink *Variable::findChild(const std::string &childName) {
+VariableLink *Variable::findChild(const std::string &childName) const {
     VariableLink *v = firstChild;
     while (v) {
         if (v->name.compare(childName)==0)
@@ -886,7 +886,7 @@ void Variable::removeAllChildren() {
     lastChild = 0;
 }
 
-Variable *Variable::getArrayIndex(int idx) {
+Variable *Variable::getArrayIndex(int idx) const {
     char sIdx[64];
     sprintf_s(sIdx, sizeof(sIdx), "%d", idx);
     VariableLink *link = findChild(sIdx);
@@ -910,7 +910,7 @@ void Variable::setArrayIndex(int idx, Variable *value) {
     }
 }
 
-int Variable::getArrayLength() {
+int Variable::getArrayLength() const {
     int highest = -1;
     if (!isArray()) return 0;
 
@@ -925,7 +925,7 @@ int Variable::getArrayLength() {
     return highest+1;
 }
 
-int Variable::getChildren() {
+int Variable::getChildren() const {
     int n = 0;
     VariableLink *link = firstChild;
     while (link) {
@@ -935,7 +935,7 @@ int Variable::getChildren() {
     return n;
 }
 
-int Variable::getInt() {
+int Variable::getInt() const {
     /* strtol understands about hex and octal */
     if (isInt()) return intData;
     if (isNull()) return 0;
@@ -944,7 +944,7 @@ int Variable::getInt() {
     return 0;
 }
 
-double Variable::getDouble() {
+double Variable::getDouble() const {
     if (isDouble()) return doubleData;
     if (isInt()) return intData;
     if (isNull()) return 0;
@@ -952,7 +952,7 @@ double Variable::getDouble() {
     return 0; /* or NaN? */
 }
 
-const std::string &Variable::getString() {
+const std::string Variable::getString() const {
     /* Because we can't return a string that is generated on demand.
      * I should really just use char* :) */
     static std::string s_null = "null";
@@ -960,39 +960,37 @@ const std::string &Variable::getString() {
     if (isInt()) {
       char buffer[32];
       sprintf_s(buffer, sizeof(buffer), "%ld", intData);
-      data = buffer;
-      return data;
+      return buffer;
     }
     if (isDouble()) {
       char buffer[32];
       sprintf_s(buffer, sizeof(buffer), "%f", doubleData);
-      data = buffer;
-      return data;
+      return buffer;
     }
     if (isNull()) return s_null;
     if (isUndefined()) return s_undefined;
     // are we just a string here?
-    return data;
+    return stringData;
 }
 
 void Variable::setInt(int val) {
     flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_INTEGER;
     intData = val;
     doubleData = 0;
-    data = TINYJS_BLANK_DATA;
+    stringData = TINYJS_BLANK_DATA;
 }
 
 void Variable::setDouble(double val) {
     flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_DOUBLE;
     doubleData = val;
     intData = 0;
-    data = TINYJS_BLANK_DATA;
+    stringData = TINYJS_BLANK_DATA;
 }
 
 void Variable::setString(const std::string &str) {
     // name sure it's not still a number or integer
     flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_STRING;
-    data = str;
+    stringData = str;
     intData = 0;
     doubleData = 0;
 }
@@ -1000,7 +998,7 @@ void Variable::setString(const std::string &str) {
 void Variable::setUndefined() {
     // name sure it's not still a number or integer
     flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_UNDEFINED;
-    data = TINYJS_BLANK_DATA;
+    stringData = TINYJS_BLANK_DATA;
     intData = 0;
     doubleData = 0;
     removeAllChildren();
@@ -1009,20 +1007,20 @@ void Variable::setUndefined() {
 void Variable::setArray() {
     // name sure it's not still a number or integer
     flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_ARRAY;
-    data = TINYJS_BLANK_DATA;
+    stringData = TINYJS_BLANK_DATA;
     intData = 0;
     doubleData = 0;
     removeAllChildren();
 }
 
-bool Variable::equals(Variable *v) {
+bool Variable::equals(const Variable *v) {
     Variable *resV = mathsOp(v, LEXER_EQUAL);
     bool res = resV->getBool();
     delete resV;
     return res;
 }
 
-Variable *Variable::mathsOp(Variable *b, int op) {
+Variable *Variable::mathsOp(const Variable *b, int op) {
     Variable *a = this;
     // Type equality check
     if (op == LEXER_TYPEEQUAL || op == LEXER_NTYPEEQUAL) {
@@ -1034,7 +1032,6 @@ Variable *Variable::mathsOp(Variable *b, int op) {
         if (!contents->getBool()) eql = false;
         if (!contents->refs) delete contents;
       }
-                 ;
       if (op == LEXER_TYPEEQUAL)
         return new Variable(eql);
       else
@@ -1119,14 +1116,14 @@ Variable *Variable::mathsOp(Variable *b, int op) {
     return 0;
 }
 
-void Variable::copySimpleData(Variable *val) {
-    data = val->data;
+void Variable::copySimpleData(const Variable *val) {
+    stringData = val->stringData;
     intData = val->intData;
     doubleData = val->doubleData;
     flags = (flags & ~VARIABLE_TYPEMASK) | (val->flags & VARIABLE_TYPEMASK);
 }
 
-void Variable::copyValue(Variable *val) {
+void Variable::copyValue(const Variable *val) {
     if (val) {
       copySimpleData(val);
       // remove all current children
@@ -1150,7 +1147,7 @@ void Variable::copyValue(Variable *val) {
     }
 }
 
-Variable *Variable::deepCopy() {
+Variable *Variable::deepCopy() const {
     Variable *newVar = new Variable();
     newVar->copySimpleData(this);
     // copy children
@@ -1169,7 +1166,7 @@ Variable *Variable::deepCopy() {
     return newVar;
 }
 
-void Variable::trace(std::string indentStr, const std::string &name) {
+void Variable::trace(const std::string &indentStr, const std::string &name) const {
     TRACE("%s'%s' = '%s' %s\n",
         indentStr.c_str(),
         name.c_str(),
@@ -1183,7 +1180,7 @@ void Variable::trace(std::string indentStr, const std::string &name) {
     }
 }
 
-std::string Variable::getFlagsAsString() {
+std::string Variable::getFlagsAsString() const {
   std::string flagstr = "";
   if (flags&VARIABLE_FUNCTION) flagstr = flagstr + "FUNCTION ";
   if (flags&VARIABLE_OBJECT) flagstr = flagstr + "OBJECT ";
@@ -1195,7 +1192,7 @@ std::string Variable::getFlagsAsString() {
   return flagstr;
 }
 
-std::string Variable::getParsableString() {
+std::string Variable::getParsableString() const {
   // Numbers can just be put in directly
   if (isNumeric())
     return getString();
@@ -1221,7 +1218,7 @@ std::string Variable::getParsableString() {
   return "undefined";
 }
 
-void Variable::getJSON(std::ostringstream &destination, const std::string &linePrefix) {
+void Variable::getJSON(std::ostringstream &destination, const std::string &linePrefix) const {
    if (isObject()) {
       std::string indentedLinePrefix = linePrefix+"  ";
       // children - handle with bracketed list
@@ -1274,10 +1271,9 @@ void Variable::unref() {
     }
 }
 
-int Variable::getRefs() {
+int Variable::getRefs() const {
     return refs;
 }
-
 
 // ----------------------------------------------------------------------------------- INTERPRETER
 
@@ -1441,7 +1437,7 @@ VariableLink *Interpreter::parseFunctionDefinition() {
   int funcBegin = l->tokenStart;
   bool noexecute = false;
   block(noexecute);
-  funcVar->var->data = l->getSubString(funcBegin);
+  funcVar->var->stringData = l->getSubString(funcBegin);
   return funcVar;
 }
 
@@ -2113,7 +2109,7 @@ void Interpreter::statement(bool &execute) {
 }
 
 /// Get the given variable specified by a path (var1.var2.etc), or return 0
-Variable *Interpreter::getScriptVariable(const std::string &path) {
+Variable *Interpreter::getScriptVariable(const std::string &path) const {
     // traverse path
     size_t prevIdx = 0;
     size_t thisIdx = path.find('.');
@@ -2131,7 +2127,7 @@ Variable *Interpreter::getScriptVariable(const std::string &path) {
 }
 
 /// get the value of the given variable, return true if it exists and fetched
-bool Interpreter::getVariable(const std::string &path, std::string &varData) {
+bool Interpreter::getVariable(const std::string &path, std::string &varData) const {
     Variable *var = getScriptVariable(path);
     // return result
     if (var) {
@@ -2159,7 +2155,7 @@ bool Interpreter::setVariable(const std::string &path, const std::string &varDat
 }
 
 /// Finds a child, looking recursively up the scopes
-VariableLink *Interpreter::findInScopes(const std::string &childName) {
+VariableLink *Interpreter::findInScopes(const std::string &childName) const {
     for (int s=scopes.size()-1;s>=0;s--) {
       VariableLink *v = scopes[s]->findChild(childName);
       if (v) return v;
@@ -2169,7 +2165,7 @@ VariableLink *Interpreter::findInScopes(const std::string &childName) {
 }
 
 /// Look up in any parent classes of the given object
-VariableLink *Interpreter::findInParentClasses(Variable *object, const std::string &name) {
+VariableLink *Interpreter::findInParentClasses(Variable *object, const std::string &name) const {
     // Look for links to actual parent classes
     VariableLink *parentClass = object->findChild(TINYJS_PROTOTYPE_CLASS);
     while (parentClass) {

@@ -192,7 +192,7 @@ public:
   ~VariableLink();
   void replaceWith(Variable *newVar); ///< Replace the Variable pointed to
   void replaceWith(VariableLink *newVar); ///< Replace the Variable pointed to (just dereferences)
-  int getIntName(); ///< Get the name as an integer (for arrays)
+  int getIntName() const; ///< Get the name as an integer (for arrays)
   void setIntName(int n); ///< Set the name as an integer (for arrays)
 };
 
@@ -211,7 +211,7 @@ public:
     void setReturnVar(Variable *var); ///< Set the result value. Use this when setting complex return data as it avoids a deepCopy()
     Variable *getParameter(const std::string &name); ///< If this is a function, get the parameter with the given name (for use by native functions)
 
-    VariableLink *findChild(const std::string &childName); ///< Tries to find a child with the given name, may return 0
+    VariableLink *findChild(const std::string &childName) const; ///< Tries to find a child with the given name, may return 0
     VariableLink *findChildOrCreate(const std::string &childName, int varFlags=VARIABLE_UNDEFINED); ///< Tries to find a child with the given name, or will create it with the given flags
     VariableLink *findChildOrCreateByPath(const std::string &path); ///< Tries to find a child with the given path (separated by dots)
     VariableLink *addChild(const std::string &childName, Variable *child=NULL);
@@ -219,22 +219,22 @@ public:
     void removeChild(Variable *child);
     void removeLink(VariableLink *link); ///< Remove a specific link (this is faster than finding via a child)
     void removeAllChildren();
-    Variable *getArrayIndex(int idx); ///< The the value at an array index
+    Variable *getArrayIndex(int idx) const; ///< The the value at an array index
     void setArrayIndex(int idx, Variable *value); ///< Set the value at an array index
-    int getArrayLength(); ///< If this is an array, return the number of items in it (else 0)
-    int getChildren(); ///< Get the number of children
+    int getArrayLength() const; ///< If this is an array, return the number of items in it (else 0)
+    int getChildren() const; ///< Get the number of children
 
-    int getInt();
-    bool getBool() { return getInt() != 0; }
-    double getDouble();
-    const std::string &getString();
-    std::string getParsableString(); ///< get Data as a parsable javascript string
+    int getInt() const;
+    bool getBool() const { return getInt() != 0; }
+    double getDouble() const;
+    const std::string getString() const;
+    std::string getParsableString() const; ///< get Data as a parsable javascript string
     void setInt(int num);
     void setDouble(double val);
     void setString(const std::string &str);
     void setUndefined();
     void setArray();
-    bool equals(Variable *v);
+    bool equals(const Variable *v);
 
     bool isInt() const { return (flags&VARIABLE_INTEGER)!=0; }
     bool isDouble() const { return (flags&VARIABLE_DOUBLE)!=0; }
@@ -248,13 +248,13 @@ public:
     bool isNull() const { return (flags & VARIABLE_NULL)!=0; }
     bool isBasic() const { return firstChild==0; } ///< Is this *not* an array/object/etc
 
-    Variable *mathsOp(Variable *b, int op); ///< do a maths op with another script variable
-    void copyValue(Variable *val); ///< copy the value from the value given
-    Variable *deepCopy(); ///< deep copy this node and return the result
+    Variable *mathsOp(const Variable *b, int op); ///< do a maths op with another script variable
+    void copyValue(const Variable *val); ///< copy the value from the value given
+    Variable *deepCopy() const; ///< deep copy this node and return the result
 
-    void trace(std::string indentStr = "", const std::string &name = ""); ///< Dump out the contents of this using trace
-    std::string getFlagsAsString(); ///< For debugging - just dump a string version of the flags
-    void getJSON(std::ostringstream &destination, const std::string &linePrefix=""); ///< Write out all the JS code needed to recreate this script variable to the stream (as JSON)
+    void trace(const std::string &indentStr = "", const std::string &name = "") const; ///< Dump out the contents of this using trace
+    std::string getFlagsAsString() const; ///< For debugging - just dump a string version of the flags
+    void getJSON(std::ostringstream &destination, const std::string &linePrefix="") const; ///< Write out all the JS code needed to recreate this script variable to the stream (as JSON)
     void setCallback(JSCallback callback, void *userdata); ///< Set the callback for native functions
 
     VariableLink *firstChild;
@@ -263,11 +263,11 @@ public:
     /// For memory management/garbage collection
     Variable *ref(); ///< Add reference to this variable
     void unref(); ///< Remove a reference, and delete this variable if required
-    int getRefs(); ///< Get the number of references to this script variable
+    int getRefs() const; ///< Get the number of references to this script variable
 protected:
     int refs; ///< The number of references held to this - used for garbage collection
 
-    std::string data; ///< The contents of this variable if it is a string
+    std::string stringData; ///< The contents of this variable if it is a string
     long intData; ///< The contents of this variable if it is an int
     double doubleData; ///< The contents of this variable if it is a double
     int flags; ///< the flags determine the type of the variable - int/double/string/etc
@@ -278,7 +278,7 @@ protected:
 
     /** Copy the basic data and flags from the variable given, with no
       * children. Should be used internally only - by copyValue and deepCopy */
-    void copySimpleData(Variable *val);
+    void copySimpleData(const Variable *val);
 
     friend class Interpreter;
 };
@@ -316,9 +316,9 @@ public:
     void addNative(const std::string &funcDesc, JSCallback ptr, void *userdata);
 
     /// get the given variable specified by a path (var1.var2.etc), or return 0
-    Variable *getScriptVariable(const std::string &path);
+    Variable *getScriptVariable(const std::string &path) const;
     /// get the value of the given variable, return true if it exists and fetched
-    bool getVariable(const std::string &path, std::string &varData);
+    bool getVariable(const std::string &path, std::string &varData) const;
     /// set the value of the given variable, return true if it exists and gets set
     bool setVariable(const std::string &path, const std::string &varData);
 
@@ -354,9 +354,9 @@ private:
     VariableLink *parseFunctionDefinition();
     void parseFunctionArguments(Variable *funcVar);
 
-    VariableLink *findInScopes(const std::string &childName); ///< Finds a child, looking recursively up the scopes
+    VariableLink *findInScopes(const std::string &childName) const; ///< Finds a child, looking recursively up the scopes
     /// Look up in any parent classes of the given object
-    VariableLink *findInParentClasses(Variable *object, const std::string &name);
+    VariableLink *findInParentClasses(Variable *object, const std::string &name) const;
 };
 
 }; // namespace TinyJS
