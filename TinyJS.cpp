@@ -758,6 +758,15 @@ Variable::Variable(int val) {
     setInt(val);
 }
 
+Variable::Variable(const std::vector<unsigned char> &val) {
+    refs = 0;
+#if DEBUG_MEMORY
+    mark_allocated(this);
+#endif
+    init();
+    setArray(val);
+}
+
 Variable::~Variable(void) {
 #if DEBUG_MEMORY
     mark_deallocated(this);
@@ -935,6 +944,19 @@ int Variable::getChildren() const {
     return n;
 }
 
+const std::vector<unsigned char> Variable::getArray() const {
+    std::vector<unsigned char> out;
+    if (isArray()) {
+        int arrayLength = getArrayLength();
+        out.reserve(arrayLength);
+        for (int i = 0; i < arrayLength; ++i) {
+            TinyJS::Variable *cell = getArrayIndex(i);
+            out.push_back(static_cast<unsigned char>(cell->getInt()));
+        }
+    }
+    return out;
+}
+
 int Variable::getInt() const {
     /* strtol understands about hex and octal */
     if (isInt()) return intData;
@@ -1011,6 +1033,18 @@ void Variable::setArray() {
     intData = 0;
     doubleData = 0;
     removeAllChildren();
+}
+
+void Variable::setArray(const std::vector<unsigned char> &val) {
+    // name sure it's not still a number or integer
+    flags = (flags&~VARIABLE_TYPEMASK) | VARIABLE_ARRAY;
+    stringData = TINYJS_BLANK_DATA;
+    intData = 0;
+    doubleData = 0;
+    removeAllChildren();
+    for (std::vector<unsigned char>::size_type i = 0; i < val.size(); ++i) {
+        setArrayIndex(i, new TinyJS::Variable(static_cast<int>(val[i])));
+    }
 }
 
 bool Variable::equals(const Variable *v) {

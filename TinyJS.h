@@ -205,6 +205,7 @@ public:
     Variable(const std::string &str); ///< Create a string
     Variable(double varData);
     Variable(int val);
+    Variable(const std::vector<unsigned char> &val); ///< Create a array-of-bytes
     ~Variable(void);
 
     Variable *getReturnVar(); ///< If this is a function, get the result value (for use by native functions)
@@ -224,6 +225,7 @@ public:
     int getArrayLength() const; ///< If this is an array, return the number of items in it (else 0)
     int getChildren() const; ///< Get the number of children
 
+    const std::vector<unsigned char> getArray() const;
     int getInt() const;
     bool getBool() const { return getInt() != 0; }
     double getDouble() const;
@@ -234,6 +236,7 @@ public:
     void setString(const std::string &str);
     void setUndefined();
     void setArray();
+    void setArray(const std::vector<unsigned char> &val);
     bool equals(const Variable *v);
 
     bool isInt() const { return (flags&VARIABLE_INTEGER)!=0; }
